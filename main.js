@@ -2,6 +2,7 @@
 const timeElement = document.getElementById('timer');
 const scoreElement = document.getElementById('score');
 const colorElement = document.getElementById('colordiv');
+const listElement = document.getElementById('list');
 //Game input
 const c1Element = document.getElementById('c1');
 const c2Element = document.getElementById('c2');
@@ -12,6 +13,8 @@ const sendBtn = document.getElementById('sendBtn');
 let timerShow = timeElement.querySelector('p');
 let scoreShow = scoreElement.querySelector('p');
 let status = 'stop';
+//database definition
+let database = firebase.database();
 
 //game initialization
 function gameInit(){
@@ -62,7 +65,7 @@ function pushData(){
     if(nameElement.value != ""){
         data.playerName = nameElement.value;
     }
-    console.log(data);
+    database.ref().push(data);
 }
 
 //choice1 clicked
@@ -130,3 +133,18 @@ timeRemaining.onmessage = function(e){
         gameStop();
     }
 }
+
+database.ref().orderByChild('score').limitToLast(5).on('value',function(snapshot){
+    let content = '';
+    let leader = [];
+    let count = 0;
+    snapshot.forEach(elt => {
+        leader[count] = "<li>" + elt.val().playerName + " - " + elt.val().score + "</li>";
+        count++;
+    });
+    leader = leader.reverse();
+    leader.forEach(data => {
+        content += data;
+    });
+    listElement.innerHTML = content;
+})
